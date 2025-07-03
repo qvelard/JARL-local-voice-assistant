@@ -11,7 +11,7 @@ set -e
 
 git add .
 # Crée un message de commit avec la date et l'heure actuelles
-commit_msg="deploy: $(date '+%Y-%m-%d %H:%M:%S')"
+commit_msg="dev: $(date '+%Y-%m-%d %H:%M:%S')"
 
 # Vérifie s'il y a quelque chose à committer
 

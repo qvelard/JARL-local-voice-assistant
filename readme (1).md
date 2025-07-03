@@ -1,7 +1,6 @@
-# JARLA Local Voice Assistant [WIP]
+# JARL Local Voice Assistant
 
-**JARLA** (Just A Realy Local Assistant) is a modular, extensible, LLM‑driven local voice assistant framework written in Python 3.11+. Designed to run entirely on your machine, JARL can listen, think, act, and speak without sending data to third‑party servers.
-
+**JARL** is a modular, extensible, LLM‑driven local voice assistant framework written in Python 3.11+. Designed to run entirely on your machine, JARL can listen, think, act, and speak without sending data to third‑party servers.
 
 ---
 
@@ -18,25 +17,26 @@
 9. [Contribution Guidelines](#contribution-guidelines)
 10. [License](#license)
 
-## Architecture Overview
-
-
-- 🧠 **AI Agents**: autonomous agents (e.g. browser navigation, “smol” agents)  
-- 🔧 **Core Modules**: audio I/O, STT/TTS, memory, plugin management, action dispatcher  
-- 🔌 **Plugin System**: drop‑in “skills” under `core/skills/` that implement new intents  
-- ⚙️ **Configurable Pipelines**: fully asynchronous (`asyncio`) orchestration, headless browser automation (Playwright), vector memory (ChromaDB)  
-- 🧪 **Test Suite**: pytest coverage for unit & integration, JSON schema validation  
-
 ---
 
-# Technical Stack & Choices
+## Overview
+
+JARL (pronounced "jarl") is inspired by Jarvis from the Marvel universe: a conversational agent that reacts to voice commands, executes tasks, and provides spoken feedback.
+
+Key design goals:
+
+- **Local-first**: All speech processing and AI traffic runs locally, preserving privacy and reducing latency.
+- **Modular**: Plug new AI agents, audio backends, or plugins with minimal effort.
+- **Extensible**: Integrate third‑party tools or Chain‑of‑Thought enhancements.
+
+## Technical Stack & Choices
 
 | Area                           | Component(s)                             | Rationale                                                                         |
 | ------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------------- |
 | **Language**                   | Python 3.11+                             | Modern typing support, performance improvements, widespread library ecosystem.    |
 | **Speech-to-Text (STT)**       | OpenAI Whisper, Vosk                     | Whisper for highest accuracy; Vosk as a lightweight alternative for edge devices. |
 | **Text-to-Speech (TTS)**       | Coqui TTS, eSpeak                        | Coqui for natural voices; eSpeak for ultra-lightweight, phoneme‑level control.    |
-| **Large Language Model (LLM)** | Ollama (local models) | Ollama enables hosting diverse LLMs locally for privacy, zero-latency access, and full control
+| **Large Language Model (LLM)** | OpenAI API or local LLM (e.g., GPT‑4All) | Flexibility to switch between cloud and on‑premises models.                       |
 | **Memory / Vector DB**         | ChromaDB                                 | Fast, simple vector store with Python API; supports semantic retrieval.           |
 | **Browser Automation**         | Playwright, BeautifulSoup                | Playwright for headless browser control; BeautifulSoup for HTML parsing.          |
 | **Configuration**              | YAML (`PyYAML`)                          | Human‑readable, supports comments, widely adopted.                                |
@@ -45,62 +45,58 @@
 
 ## Architecture
 
-flowchart LR
-    subgraph Input Processing
-      U["User (Voice Command)"] --> L[Listener]
-      L --> S[Speech-to-Text]
+```mermaid
+flowchart TD
+    subgraph User Interaction
+      U["User (Voice/Command)"]
     end
-    subgraph Core Processing
-      S --> O[Orchestrator]
-      O --> M[Memory]
-      O --> PM[Plugin Manager]
-      O --> AD[Action Dispatcher]
-      AD --> bash[System Commands]
-      O --> BA[Browser Agent]
+    subgraph Core Orchestrator
+      O[Orchestrator]
+      AD[Action Dispatcher]
+      PM[Plugin Manager]
+      M[Memory]
+      L[Listener]
+      S[STT]
+      T[TTS]
     end
-    subgraph Output Generation
-      O --> T[Text-to-Speech]
-      T --> U2["User (Spoken Response)"]
+    subgraph AI Agents
+      BA[Browser Agent]
+      ...[Other Agents]
     end
+
+    U --> L
+    L --> S --> O
+    O --> AD --> bash[System Commands]
+    O --> BA
+    BA --> O
+    O --> M
+    O --> PM
+    O --> T
+    T --> U
+```
+
+1. **Listener**: Captures audio from microphone, detects hotword.
+2. **STT**: Converts audio to text locally.
+3. **Orchestrator**: Core logic, invokes memory, plugins, and AI agents.
+4. **Action Dispatcher**: Maps high‑level intents to system commands or tool invocations.
+5. **Memory**: Vector database for context-aware conversations.
+6. **Plugin Manager**: Dynamically loads skills (e.g., smart home control).
+7. **TTS**: Synthesizes responses.
 
 ## Project Structure
 
-```text
+```
 JARL-local-voice-assistant/
-├── ai_agents/                  # Autonomous AI agents
-│   └── browser_agent.py
-│
-├── core/                       # Core engine components
-│   ├── listener.py            # Hotword/hotkey & audio capture
-│   ├── stt.py                 # Local speech‑to‑text (Whisper/Vosk)
-│   ├── tts.py                 # Local text‑to‑speech (Coqui‑TTS/eSpeak)
-│   ├── memory.py              # Vector store (ChromaDB) & RAG
-│   ├── action_dispatcher.py   # Map “plan steps” → system/browser actions
-│   ├── plugin_manager.py      # Discover/load “skills” in core/skills/
-│   └── utils.py               # Config loader, structured logger, JSON schema
-│
-├── core/skills/               # Custom “skill” modules (each implements can_handle/run)
-│   └── example_skill.py
-│
-├── prompts/                    # LLM prompt templates & JSON schemas
-│   ├── system_prompt.json
-│   ├── user_prompt.tpl
-│   └── cot_prompt.tpl
-│
-├── configs/                    # YAML configuration (hotkey, model names, etc.)
-│   └── config.yaml
-│
-├── tests/                      # pytest unit & integration tests
-│   ├── test_listener.py
-│   ├── test_stt.py
-│   ├── …  
-│   └── test_utils.py
-│
-├── docker-compose.yml          # Orchestrator + ChromaDB + Redis (optional)
-├── Dockerfile                  # GPU‑ready container image
-├── main.py                     # Bootstrapper: hotkey loop → orchestrator → TTS
-├── requirements.txt            # Pin exact dependencies
-└── README.md                   # (You are reading it!)
+├── ai_agents/                # Autonomous AI agents (e.g., browser_agent.py)
+├── core/                     # Core modules: listener, stt, tts, memory, dispatcher, utils
+├── services/                 # Cross‑cutting or future external services
+├── configs/                  # YAML configuration files
+├── prompts/                  # LLM prompt templates (.tpl, .json)
+├── tests/                    # Unit & integration tests (pytest)
+├── deploy.sh                 # Deployment helper script
+├── requirements.txt          # Pin dependencies
+└── README.md                 # <-- this file
+```
 
 ## Installation
 
@@ -129,7 +125,7 @@ Key settings in `config.yaml`:
 
 - `stt_engine`: `whisper` or `vosk`
 - `tts_engine`: `coqui` or `espeak`
-- `llm`: 
+- `llm`, `api_key`: Credentials for OpenAI or path to local LLM
 - `memory`: ChromaDB settings (embedding model, storage path)
 - `hotword`: Custom activation keyword
 
