@@ -1,0 +1,2 @@
+memory:
+  persistent_client_path: ./data/chroma_db 

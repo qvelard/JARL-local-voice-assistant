@@ -3,7 +3,7 @@ Action dispatcher module for executing plan steps.
 """
 from typing import Dict, Any, Optional
 import subprocess
-from services.utils import logger, load_config
+from core.utils import logger, load_config
 
 class ActionDispatcher:
     """

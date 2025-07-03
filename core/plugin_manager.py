@@ -4,7 +4,7 @@ Plugin manager module for skill discovery and loading.
 from typing import List, Any
 import os
 import importlib.util
-from services.utils import logger, load_config
+from core.utils import logger, load_config
 
 class PluginManager:
     """

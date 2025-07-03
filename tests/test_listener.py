@@ -1,7 +1,11 @@
+"""
+Tests for the Listener module.
+Covers audio recording functionality, including normal and failure cases.
+"""
 import pytest
 from unittest.mock import patch, MagicMock
 import numpy as np
-from services.listener import Listener
+from core.listener import Listener
 
 @patch('services.listener.sd')
 def test_record_audio_happy_path(mock_sd):

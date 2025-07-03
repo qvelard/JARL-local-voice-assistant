@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 import numpy as np
-from services.stt import SpeechToText
+from core.stt import SpeechToText
 
 @patch('services.stt.whisper')
 def test_transcribe_happy_path(mock_whisper):

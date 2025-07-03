@@ -3,7 +3,7 @@ Memory module for vector DB operations using Chroma.
 """
 from typing import List, Optional
 import chromadb
-from services.utils import logger, load_config
+from core.utils import logger, load_config
 
 class Memory:
     """
@@ -12,7 +12,8 @@ class Memory:
     def __init__(self) -> None:
         self.config = load_config()
         try:
-            self.client = chromadb.Client()
+            persistent_path = self.config.get('memory', {}).get('persistent_client_path', './data/chroma_db')
+            self.client = chromadb.PersistentClient(path=persistent_path)
             self.collection = self.client.create_collection(self.config.get('memory', {}).get('collection', 'default'))
         except Exception as e:
             logger.error(f"Failed to initialize Chroma DB: {e}")
@@ -30,6 +31,7 @@ class Memory:
             bool: True if successful, False otherwise.
         """
         try:
+            # TODO : which embedding ? do a benchmarck ?
             self.collection.add(embeddings=[embedding], metadatas=[metadata])
             logger.info("Embedding ingested successfully.")
             return True
@@ -49,6 +51,7 @@ class Memory:
             Optional[List[dict]]: List of matching metadata dicts, or None if failed.
         """
         try:
+            # TODO : which method for queries ?
             results = self.collection.query(query_embeddings=[embedding], n_results=n_results)
             return results.get('metadatas')
         except Exception as e:

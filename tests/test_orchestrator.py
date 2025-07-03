@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
-from services.orchestrator import app, Orchestrator
+from services.main import app, Orchestrator
 
 @patch('services.orchestrator.requests.post')
 def test_plan_endpoint_happy_path(mock_post):

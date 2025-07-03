@@ -4,7 +4,7 @@ Browser agent module for headless browsing and scraping.
 from typing import Optional
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
-from services.utils import logger, load_config
+from core.utils import logger, load_config
 import asyncio
 
 class BrowserAgent:
@@ -32,7 +32,7 @@ class BrowserAgent:
                 browser = await p.chromium.launch(headless=True)
                 page = await browser.new_page()
                 await page.goto(url, timeout=self.timeout)
-                html = await page.content()
+                html = await page.content() # Playwright is rendering HTML in order for bs4 to process
                 await browser.close()
             soup = BeautifulSoup(html, 'html.parser')
             if selector:

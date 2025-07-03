@@ -4,38 +4,43 @@ A modular, extensible local voice assistant framework in Python 3.11+.
 
 ## Architecture Overview
 
-JARL is built around a set of specialized modules:
+JARL est organisé en modules clairs et évolutifs :
 
-- **AI Agents**: Autonomous modules with reasoning or web interaction capabilities (e.g., browser_agent). These are placed in the `ai_agents/` folder.
-- **Services**: Core skills and utilities (listening, STT, TTS, memory, plugins, orchestrator, etc.) in the `services/` folder.
-- **Orchestrator**: Central planner, assembling prompts, calling the LLM, and validating plans.
-- **Utils**: Shared helpers (config loader, logger, schema loader).
-- **Tests**: Each module has dedicated pytest coverage.
+- **ai_agents/** : Agents IA autonomes (ex : browser_agent, smol-agents…)
+- **core/** : Modules cœur (mémoire, dispatcher, gestion des plugins, utils, audio)
+- **services/** : (Réservé pour des services transverses ou futurs)
+- **tests/** : Tous les tests unitaires et d’intégration
+- **configs/** : Fichiers de configuration YAML
+- **prompts/** : Templates de prompts LLM
 
-This architecture allows for easy extension: new AI agents can be added in the `ai_agents/` folder and discovered dynamically.
+Cette architecture permet d’ajouter facilement de nouveaux agents, modules cœur ou services.
 
 ## Architecture Diagram
 
 ```mermaid
 flowchart TD
-    U["User (Voice/Command)"] --> L["Listener"]
-    L --> S["STT"]
-    S --> O["Orchestrator"]
+    U["User (Voice/Command)"] --> O["Orchestrator"]
     O --> AD["Action Dispatcher"]
     O --> BA["Browser Agent"]
     O --> M["Memory"]
     O --> PM["Plugin Manager"]
+    O --> L["Listener"]
+    O --> S["STT"]
     O --> TTS["TTS"]
     AD --> UTL["Utils"]
     BA --> O
     M --> O
     PM --> O
-    TTS --> U
+    L --> O
+    S --> O
+    TTS --> O
     UTL -.-> O
     UTL -.-> AD
     UTL -.-> BA
     UTL -.-> M
     UTL -.-> PM
+    UTL -.-> L
+    UTL -.-> S
     UTL -.-> TTS
 ```
 
@@ -43,59 +48,58 @@ flowchart TD
 
 ```
 JARL-local-voice-assistant/
-├── ai_agents/               # Autonomous AI agents
-│   └── browser_agent.py         # Headless browsing & web interaction
-├── services/                # Core service modules
-│   ├── action_dispatcher.py     # Maps plan steps to subprocess/OS calls
-│   ├── listener.py              # Hotkey/wake-word, audio recording
-│   ├── memory.py                # Chroma vector DB wrapper
-│   ├── orchestrator.py          # FastAPI endpoint, LLM planning
-│   ├── plugin_manager.py        # Skill discovery & loading
-│   ├── stt.py                   # Speech-to-text (Whisper)
-│   ├── tts.py                   # Text-to-speech (Coqui-TTS)
-│   └── utils.py                 # Config loader, logger, helpers
-├── tests/                   # Pytest test suite for all modules
+├── ai_agents/                # Agents IA autonomes
+│   └── browser_agent.py
+├── core/                     # Modules cœur (mémoire, dispatcher, plugins, utils, audio)
+│   ├── action_dispatcher.py
+│   ├── listener.py
+│   ├── memory.py
+│   ├── plugin_manager.py
+│   ├── stt.py
+│   ├── tts.py
+│   └── utils.py
+├── services/                 # (Réservé pour futurs services)
+├── tests/                    # Tests unitaires et d’intégration
 │   ├── test_action_dispatcher.py
 │   ├── test_browser_agent.py
 │   ├── test_listener.py
 │   ├── test_memory.py
-│   ├── test_orchestrator.py
 │   ├── test_plugin_manager.py
 │   ├── test_stt.py
 │   ├── test_tts.py
 │   └── test_utils.py
-├── configs/                 # YAML config files (expected, not present)
+├── configs/                  # Fichiers de configuration YAML
 │   └── config.yaml
-├── prompts/                 # Prompt templates (expected, not present)
+├── prompts/                  # Templates de prompts LLM
 │   └── *.tpl / *.json
 ├── LICENSE
-└── README.md
+├── README.md
+└── requirements.txt
 ```
 
 ## AI Agents
-- **browser_agent**: Headless Playwright browsing, BeautifulSoup scraping, autonomous web interaction
+- **browser_agent** : Navigation web autonome (Playwright, BeautifulSoup)
 
-## Services
-- **listener**: Detects hotkey/wake-word, records audio
-- **stt**: Speech-to-text using Whisper
-- **action_dispatcher**: Maps plan steps to subprocess/OS calls
-- **tts**: Text-to-speech with Coqui-TTS
-- **memory**: Chroma vector DB for embeddings
-- **plugin_manager**: Discovers and loads skills
-- **orchestrator**: FastAPI endpoint `/plan`, LLM prompt assembly, plan validation
-- **utils**: Config loader, structured logger, JSON schema loader
+## Core Modules
+- **listener** : Capture audio micro, détection hotword
+- **stt** : Speech-to-text local (Whisper, Vosk…)
+- **tts** : Synthèse vocale locale (Coqui-TTS, eSpeak…)
+- **action_dispatcher** : Exécute les plans via des commandes système
+- **memory** : Stockage vectoriel (ChromaDB)
+- **plugin_manager** : Découverte et chargement de plugins/skills
+- **utils** : Logger structuré, chargement config, helpers
 
 ## Setup
-1. Install Python 3.11+
-2. Install dependencies (see requirements.txt or pyproject.toml)
-3. Add your `configs/config.yaml` and any prompt templates as needed
+1. Installe Python 3.11+
+2. Installe les dépendances (`requirements.txt` ou `pyproject.toml`)
+3. Ajoute ton `configs/config.yaml` et tes prompts si besoin
 
 ## Testing
-Run all tests with:
+Lance tous les tests avec :
 ```
 pytest
 ```
 
 ---
 
-*This project is modular and ready for extension with new AI agents, skills, and integrations.*
+*Ce projet est prêt pour l’extension avec de nouveaux agents IA, modules cœur et intégrations.*

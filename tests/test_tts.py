@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from services.tts import TextToSpeech
+from core.tts import TextToSpeech
 
 @pytest.mark.asyncio
 @patch('services.tts.CoquiTTS')

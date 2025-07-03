@@ -1,7 +1,7 @@
 """
 STT module for speech-to-text using Whisper.
 """
-from typing import Optional
+from typing import Tuple, List, Union, Callback, Optional
 import numpy as np
 import whisper
 from services.utils import logger, load_config

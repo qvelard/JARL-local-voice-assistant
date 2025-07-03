@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, mock_open
-from services.utils import load_config, load_json_schema
+from core.utils import load_config, load_json_schema
 
 @patch('builtins.open', new_callable=mock_open, read_data='foo: bar')
 @patch('services.utils.yaml.safe_load', return_value={'foo': 'bar'})
